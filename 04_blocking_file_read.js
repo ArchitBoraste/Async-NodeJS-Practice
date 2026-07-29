@@ -1,5 +1,5 @@
 //similar as the 01_blocking.js but this time we are not doing an artificial busy wait like 
-//the block func
+//the block function
 
 import {readFileSync} from 'node:fs'
 
