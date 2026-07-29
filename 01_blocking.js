@@ -25,7 +25,7 @@ console.log(`1) start ${timeEllapsed()}`)
 //block with 1000ms as the duration
 setTimeout(()=>{
     console.log(`2) Blocking started at ${timeEllapsed()}`)
-    block(1000)
+    block(3000)
     console.log(`3) Blocking ended at ${timeEllapsed()}`)
 },400)
 
@@ -37,3 +37,4 @@ setTimeout(()=>{
     console.log(`4) end ${timeEllapsed()}`)
 },2000)
 
+//EDIT-1 changed block duration to 3000 to see what happens 
