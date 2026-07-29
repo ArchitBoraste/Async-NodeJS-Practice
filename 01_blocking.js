@@ -3,7 +3,7 @@
 
 const start = Date.now()
 
-const timeEllapsed = () => `+${String(Date.now() - start).padStart(4,'')}ms`
+const timeEllapsed = () => `+${String(Date.now() - start).padStart(4,' ')}ms`
 //tells time elapsed since program started running
 
 const heartBeat = setInterval(()=>{

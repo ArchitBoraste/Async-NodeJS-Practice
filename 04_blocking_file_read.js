@@ -4,7 +4,7 @@
 import {readFileSync} from 'node:fs'
 
 const start = Date.now()
-const timeEllapsed = () =>`+${String(Date.now() - start).padStart(5,'')}ms`
+const timeEllapsed = () =>`+${String(Date.now() - start).padStart(5,' ')}ms`
 
 const heartbeat = setInterval(()=>{
     console.log(`   +heartbeat        ${timeEllapsed()}`)
