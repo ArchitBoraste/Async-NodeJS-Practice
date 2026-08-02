@@ -22,3 +22,39 @@ function demoAll(){
     })
 }
 
+//2. Promise.allSettled
+//doesnt crash on failure. Say we are fetching 3 promises concurrently and one fails....this will still wait for every task to finish
+//and return the result of all all promises with status of 'fulfilled' or 'rejected'
+function demoAllSettled(){
+    console.log('Promise.allSettled: one promise will fail')
+    return Promise.allSettled([
+        findOffers(7),
+        findOffersBroken(),
+        findOffers(9)
+    ]).then((results)=>{
+
+        results.forEach((result, index)=>{
+        // Each entry: { status: 'fulfilled', value } | { status: 'rejected', reason }
+
+            //for first iteration 'findOffers(7)' result will look like:
+            //{ status: 'fulfilled', value: [ { bank: 'HDFC...' }, { bank: 'ICICI...' } ] }
+
+            //for second iteration 'findOffersBroken()' result will look like:
+            //{ status: 'rejected', reason: Error: TIMEDOUT: finance provider unreachable }
+
+            //and index simply means the index of the promise in the array we passed to Promise.allSettled
+            //index 0->findOffers(7), index 1->findOffersBroken(), index 2->findOffers(9)
+
+            if(result.status === 'fulfilled'){
+                console.log(`provider ${index}: ${result.value.length} offer`);
+            } else {
+                console.log(`provider ${index}: failed ${result.reason.message}`)
+                //note that we dont need to do result.reason.error.message
+                //error already has a builtin message prop
+                //const myError = new Error('TIMEDOUT');
+                //console.log(myError.message); -->Prints: "TIMEDOUT"
+            }
+
+        })
+    })
+}  

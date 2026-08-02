@@ -101,7 +101,7 @@ export async function findOffersSlow(dealerId) {
 
 export async function findOffersBroken() {
   await sleep(120);
-  throw new Error('ETIMEDOUT: finance provider unreachable');
+  throw new Error('TIMEDOUT: finance provider unreachable');
 }
 //simulates server that is offline or crashed 
 
