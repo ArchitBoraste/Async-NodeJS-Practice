@@ -102,3 +102,25 @@ function demoAny(){
     })
 }
 
+//4.Sequential vs Parallel execution
+function demoSequentialvsParallel(){
+    console.log('Sequential vs Parallel execution')
+
+    const t0 = process.hrtime.bigint()
+    const sequential = findCar(101)
+    .then((car)=>{
+        return findDealer(car.dealerId).then((dealer)=>({car})) //start here
+    })
+    .then((dealer)=>{
+        return findOffers(dealer.id)
+    })
+    .then((offers)=>{
+        return findInsurance(car.id).then((insurance)=>({
+            car: car, 
+            dealer: dealer, 
+            offers: offers, 
+            insurance: insurance
+        }))
+    })
+    .then(()=> Number(process.hrtime.bigint() - t0)/1_000_000)
+}
