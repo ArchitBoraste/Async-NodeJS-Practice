@@ -20,6 +20,8 @@ function demoAll(){
         console.log(`${cars.length} cars in ${took.toFixed(0)}ms`)//took is the time fetch all 3 cars, not the sum of time to fetch each car
         cars.forEach((car)=>console.log(`${car.model.padEnd(18)} ${formatINR(car.pricePaise)}`))
     })
+
+    //in console the cars will be displayed in the order they were called
 }
 
 //2. Promise.allSettled
@@ -56,5 +58,47 @@ function demoAllSettled(){
             }
 
         })
+
+        const good = results.filter((result)=>result.status === 'fulfilled').flatMap((result)=>result.value)
+        //.filter would return array of fulfilled results 
+        //say for example we get:
+        // [
+        //     { status: 'fulfilled', value: [ { bank: 'HDFC' }, { bank: 'ICICI' } ] }, // Dealer 7's offers
+        //     { status: 'fulfilled', value: [ { bank: 'Axis' } ] }                     // Dealer 9's offers
+        // ]....ignoring the ratepct and tenureMonths for this ex
+
+        //.map((result)=>result.value) would return:
+        // [
+        //  [ { bank: 'HDFC' }, { bank: 'ICICI' } ],
+        //  [ { bank: 'Axis' } ]
+        // ]
+
+        // .flatMap will return: 
+        // [
+        //     { bank: 'HDFC' }, 
+        //     { bank: 'ICICI' }, 
+        //     { bank: 'Axis' }
+        // ]
+
+        console.log(` returned ${good.length} offers despite a dead provider.`);
+        console.log(' With Promise.all, the whole response would have been lost.\n');
+
     })
 }  
+
+//3.Promise.race 
+//the first promise to resolve wins and the rest are ignored. (It gnores the rejected promises)
+function demoAny(){
+    console.log('Promise.race: first promise to resolve wins')
+
+    return Promise.any([
+        findOffersBroken(),     // fails fast
+        findOffersSlow(7),      // slow but works
+        findOffers(7),          // fast and works ← should win
+    ])
+
+    .then((offers)=>{
+        console.log(`first successful response had: ${offers.length} offers`)
+    })
+}
+
