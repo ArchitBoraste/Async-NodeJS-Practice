@@ -21,3 +21,20 @@ async function pitfall1(){
 }
 
 
+//2.Unhandled Rejection
+async function pitfall2(){
+    console.log("\nUnhandled Rejection\n")
+
+    findOffersBroken()
+    //nobody is handling the rejection from this and since v15+ of node this will terminate the process
+
+    await sleep(200)
+
+    findOffersBroken().catch((err)=>{console.log(`error is ${err.message}`)})
+    //handled the error through attatching the .catch ... We could have also use try catch block
+    
+    
+    await sleep(200)
+}
+process.on('unhandledRejection')
+
