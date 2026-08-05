@@ -7,17 +7,17 @@ const timeEllapsed = () => {
 }
 
 async function getCarQuote(carId){
-    const car = await findCar(101)
-    console.log(`car: ${car.model} --> ${timeEllapsed}`)
+    const car = await findCar(carId)
+    console.log(`car: ${car.model} --> ${timeEllapsed()}`)
 
     const dealer = await findDealer(car.dealerId)
-    console.log(`dealer: ${dealer.name} --> ${timeEllapsed}`)
+    console.log(`dealer: ${dealer.name} --> ${timeEllapsed()}`)
 
     const [offers, insurance] = await Promise.all([
         findOffers(dealer.id),
         findInsurance(car.id)
     ])
-    console.log(`${offers.length} offers and also insurance found -->${timeEllapsed}`)
+    console.log(`${offers.length} offers and also insurance found -->${timeEllapsed()}`)
 
     return {car, dealer, offers, insurance}
 }
@@ -25,7 +25,7 @@ async function getCarQuote(carId){
 
 const quote = await getCarQuote(101);
 
-console.log(`\n✅ QUOTE READY                   ${timeEllapsed()}`);
+console.log(`\n QUOTE READY                   ${timeEllapsed()}`);
 console.log(`   ${quote.car.model} (${quote.car.year}) — ${formatINR(quote.car.pricePaise)}`);
 console.log(`   Dealer: ${quote.dealer.name}, ${quote.dealer.city} (${quote.dealer.rating})`);
 quote.offers.forEach((o) => console.log(`   Finance: ${o.bank} @ ${o.ratePct}% / ${o.tenureMonths}mo`));
@@ -39,6 +39,10 @@ catch(err){
     console.log(`error: ${err.message}`)
 }
 finally{
-    console.log(`finally blocks runs no matter what -->${timeEllapsed}`)
+    console.log(`finally blocks runs no matter what -->${timeEllapsed()}`)
 }
 
+const p = getCarQuote(101)
+console.log(`\ngetCarQuote(101) returned a: ${p.constructor.name}`)//.constructor.name returns what kind of object it is (ex->string, promise, array)
+console.log(`Is it a promise-> ${p instanceof Promise}`)//p instanceof Promise ask js => Was the variable p built using the Promise blueprint?
+await p
