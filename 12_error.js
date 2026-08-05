@@ -1,6 +1,6 @@
 import { findCar, findDealer, findOffers, findOffersBroken } from './09_fake_db.js';
 
-const sleep = (ms) => new Promise((resolve)=>{resolve, ms})
+const sleep = (ms) => new Promise((resolve)=>{setTimeout(resolve, ms)})
 
 //1. forgetting return inside .then
 async function pitfall1(){
@@ -36,5 +36,80 @@ async function pitfall2(){
     
     await sleep(200)
 }
-process.on('unhandledRejection')
+process.on('unhandledRejection', (reason)=>{
+    console.log(`unhandled rejection: ${reason.message} --> kills process `)
+})
 
+
+//3. nesting .then instead of chaining
+async function pitfall3(){
+    console.log("Nesting instead of chaining")
+
+    await findCar(101)
+        .then((car) =>{
+            return findOffers(car.dealerId).then((offers)=>{
+                return findCar(202).then((car2)=> {
+                    console.log("Inner rejections will escape the outer catch")
+                })
+            })
+        })
+
+    //we would have to had write multiple catches like this
+    await findCar(101)
+        .then((car)=>{
+            return findOffers(car.dealerId).then((offers)=>{
+                return findCar(202).then((car2)=>{
+                    console.log("3 levels deep")
+                }).catch((err)=>{console.log(`Faied to get car 202: ${err.message}`)})
+            }).catch((err)=>{console.log(`failed to get offers: ${err.message}`)})
+        }).catch((err)=>{console.log(`failed to get car 202: ${err.message}`)})
+    
+    //better way is to simply chain rather than nest
+    let car, offers, car2 //we initialised them so when their chain ends we can still access them
+    await findCar(101)
+    .then((c)=>{
+        car=c
+        return findOffers(car.dealerId)
+    })
+    .then((o)=>{
+        offers=o
+        return findCar(202)
+    })
+    .then((c2)=>{
+        car2=c2
+        console.log("here is a flat chain so no need of multiple catch error")
+    })
+    .catch((err)=>`error caight : ${err}`)
+}
+
+//calling a promise inside a promise
+function pitfall4() {
+  console.log('--- Pitfall 4: needless new Promise ---');
+
+  //Pointless, and it silently DROPS errors: if findCar rejects, nothing calls reject, so this promise hangs forever.
+  function badGetCar(id) {
+    return new Promise((resolve) => {
+      findCar(id).then((car) => resolve(car));
+    });
+  }
+
+  //It's already a promise. Just return it.
+  function goodGetCar(id) {
+    return findCar(id);
+  }
+
+//   console.log("\ntrying to execute badGetCar")
+//   badGetCar(111)
+
+  console.log('  badGetCar(999) will hang forever — reject is never called');
+  console.log('  goodGetCar just returns the promise it already had');
+  console.log('  only use `new Promise` to wrap a NON-promise API.\n');
+
+  return goodGetCar(101).then((c) => console.log(`  sanity check: ${c.model}`));
+}
+
+
+await pitfall1();
+await pitfall2();
+await pitfall3();
+await pitfall4();
