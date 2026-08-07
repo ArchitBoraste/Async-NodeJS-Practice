@@ -61,3 +61,9 @@ Promise.all([findOffers(7), findOffersBroken(), findOffers(9)])
 const off = await Promise.allSettled([findOffers(7), findOffersBroken(), findOffers(9)])
 const good = off.filter((r)=>{return r.status === 'fulfilled'}).flatMap((r)=>r.value)
 console.log(`Promise.allSettled returns status and value, good status offers filtered out =>`, good)
+
+
+
+//Unhandled rejected promises crash the server->(since node 15)...this one unhandledRejection can cause all the the users data to go
+findOffersBroken()
+process.on('unhandledRejection', (r)=>{return console.log("Fatal error")})
