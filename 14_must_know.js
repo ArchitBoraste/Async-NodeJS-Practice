@@ -22,3 +22,23 @@ await time('Parallel', async ()=>{
         findInsurance(101)
     ])
 })
+
+
+//2.Loops -> sequential (for...of + await(serial)) vs parallel(map + promis.all)
+console.log("\nLoops")
+const ids = [101, 202, 303]
+let out1, out2
+
+await time("for...of + await(serial)", async () => {
+    out1 = []
+    for(let id of ids){
+        out1.push(await findCar(101))
+    }
+})
+
+await time("map + promise.all", async()=>{
+    out2 = await Promise.all(ids.map((id) => findCar(id)))
+})
+
+// console.log('\nOutput 1 (Serial):', out1)
+// console.log('\nOutput 2 (Parallel):', out2)
