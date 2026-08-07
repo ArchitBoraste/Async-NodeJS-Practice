@@ -51,5 +51,13 @@ ids.forEach(async (id) => { collected.push(await findCar(id)); });
 console.log(`\nforEach got ${collected.length} items (expected 3)`);
 
 const cars = await Promise.all(ids.map((id)=>findCar(id)))
-console.log(`map got ${cars.length} (expected 3)`)
+console.log(`map got ${cars.length} (expected 3) \n\n`)
 
+
+//4.all vs allSettled
+Promise.all([findOffers(7), findOffersBroken(), findOffers(9)])
+.catch((err)=>{console.log(`promise.all failed all becos of 1: ${err.message}`)})
+
+const off = await Promise.allSettled([findOffers(7), findOffersBroken(), findOffers(9)])
+const good = off.filter((r)=>{return r.status === 'fulfilled'}).flatMap((r)=>r.value)
+console.log(`Promise.allSettled returns status and value, good status offers filtered out =>`, good)
