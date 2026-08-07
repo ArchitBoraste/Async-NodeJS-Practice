@@ -42,3 +42,14 @@ await time("map + promise.all", async()=>{
 
 // console.log('\nOutput 1 (Serial):', out1)
 // console.log('\nOutput 2 (Parallel):', out2)
+
+
+//3. forEach not built for promises, hence not to be used with async
+//better to use map function
+const collected = [];
+ids.forEach(async (id) => { collected.push(await findCar(id)); });
+console.log(`\nforEach got ${collected.length} items (expected 3)`);
+
+const cars = await Promise.all(ids.map((id)=>findCar(id)))
+console.log(`map got ${cars.length} (expected 3)`)
+
