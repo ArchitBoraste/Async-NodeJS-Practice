@@ -63,7 +63,7 @@ let currentDealer = null
 app.get('/bug/:carId', async (req,res)=>{
     const {carId} = req.params 
     const car = await findCar(carId)
-    const currentDealer = await findDealer(car.dealerId)
+    currentDealer = await findDealer(car.dealerId)
     const offers = await findOffers(currentDealer.id)
 
     console.log(`${carId} -> ${currentDealer.name}`)
@@ -79,9 +79,34 @@ app.get('/test2',(req,res)=>{
         fetch('http://localhost:4900/bug/101'),
         fetch('http://localhost:4900/bug/202')
     ]).then(()=>{console.log("Ran bug code")})
+
+    res.send()
 })
 
+//3. 2 ka bug fix (keep things in function scope and not module scope)
+//dont declare car/dealer/offers in module scope else all users will have one bucket they are referring to and will just overwrite
+//previous data 
+app.get('/correct/:carId', async (req, res)=>{
+    const {carId} = req.params
+    const car = await findCar(carId)
+    const dealer = await findDealer(car.dealerId)
+    const offers = await findOffers(dealer.id)
 
+     console.log(`${carId} -> ${dealer.name}`)
+    res.json({
+        car:car.model,
+        dealer:dealer.name,
+        offers
+    })
+})
+app.get('/test3', (req,res)=>{
+     Promise.all([
+        fetch('http://localhost:4900/correct/101'),
+        fetch('http://localhost:4900/correct/202')
+    ]).then(()=>{console.log("Ran bug code")})
+
+    res.send()
+})
 app.listen(4900, ()=>{
     console.log('Listening on port : http://localhost:4900')
 })
