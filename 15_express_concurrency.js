@@ -6,7 +6,7 @@ const app = express()
 const start = process.hrtime.bigint()
 const time = () => `${(Number(process.hrtime.bigint() - start) / 1_000_000).toFixed(0).padStart(5)}ms`
 
-//Make 2 requests interleave here for example:
+//1. Make 2 requests interleave here for example:
 //run http://localhost:4900/trace/101 and http://localhost:4900/trace/202 at the same time
 app.get('/trace/:carId', async (req, res)=>{
     const {carId} = req.params
@@ -40,7 +40,7 @@ app.get('/trace/:carId', async (req, res)=>{
     res.json({car, dealer, offers})
 })
 
-app.get('/test',(req,res)=>{
+app.get('/test1',(req,res)=>{
     console.log('running 2 routes for "/trace/:carId" simultaneously')
     Promise.all([
         fetch('http://localhost:4900/trace/101'),
@@ -48,6 +48,39 @@ app.get('/test',(req,res)=>{
     ])
     res.send()
 })
+
+
+//2. Bug -> current dealer declared outside route
+let currentDealer = null
+//This variable is declared outside the route handler. In Node.js, this means it lives in the "Module Scope." There is only one 
+//currentDealer bucket for the entire server. Every single user who connects to the app is sharing this exact same bucket.
+//Hence this can easily get overwritten
+
+//ex-> A wants 101, B wants 202...and want corresponding car dealers
+//A finishes the the lookup for dealer first then 'currentDealer' bucjet is filled with A's dealer
+//B comes later and as A and b share same 'currentDealer' bucket B over-writes the bucket with its dealers info...wiping out A's
+
+app.get('/bug/:carId', async (req,res)=>{
+    const {carId} = req.params 
+    const car = await findCar(carId)
+    const currentDealer = await findDealer(car.dealerId)
+    const offers = await findOffers(currentDealer.id)
+
+    console.log(`${carId} -> ${currentDealer.name}`)
+    res.json({
+        car:car.model,
+        dealer:currentDealer.name,
+        offers
+    })
+})
+
+app.get('/test2',(req,res)=>{
+    Promise.all([
+        fetch('http://localhost:4900/bug/101'),
+        fetch('http://localhost:4900/bug/202')
+    ]).then(()=>{console.log("Ran bug code")})
+})
+
 
 app.listen(4900, ()=>{
     console.log('Listening on port : http://localhost:4900')
