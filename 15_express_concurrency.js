@@ -6,6 +6,8 @@ const app = express()
 const start = process.hrtime.bigint()
 const time = () => `${(Number(process.hrtime.bigint() - start) / 1_000_000).toFixed(0).padStart(5)}ms`
 
+//Make 2 requests interleave here for example:
+//run http://localhost:4900/trace/101 and http://localhost:4900/trace/202 at the same time
 app.get('/trace/:carId', async (req, res)=>{
     const {carId} = req.params
 
@@ -36,4 +38,17 @@ app.get('/trace/:carId', async (req, res)=>{
     console.log(`${time()} found offers, ${carId} handler STOP`)
 
     res.json({car, dealer, offers})
+})
+
+app.get('/test',(req,res)=>{
+    console.log('running 2 routes for "/trace/:carId" simultaneously')
+    Promise.all([
+        fetch('http://localhost:4900/trace/101'),
+        fetch('http://localhost:4900/trace/202')
+    ])
+    res.send()
+})
+
+app.listen(4900, ()=>{
+    console.log('Listening on port : http://localhost:4900')
 })
